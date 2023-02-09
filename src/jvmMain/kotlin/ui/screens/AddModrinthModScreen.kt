@@ -147,7 +147,9 @@ fun AddModrinthModScreen(onModAdded: () -> Unit) {
             }
         }
 
-        LazyColumn(Modifier.fillMaxWidth().weight(1f)) {
+        val modsListState = rememberLazyListState()
+
+        LazyColumn(state = modsListState, modifier = Modifier.fillMaxWidth().weight(1f)) {
             item {
                 AnimatedVisibility(search == null) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
@@ -185,14 +187,14 @@ fun AddModrinthModScreen(onModAdded: () -> Unit) {
                 ) {
                     items(pages) { index ->
                         OutlinedButton(
-                            doAsync { performSearch(index) },
+                            doAsync { performSearch(index); scope.launch { modsListState.scrollToItem(0) } },
                             Modifier.padding(horizontal = 4.dp),
                             colors = if (page == index) ButtonDefaults.outlinedButtonColors(
                                 contentColor = MaterialTheme.colorScheme.onPrimary,
                                 containerColor = MaterialTheme.colorScheme.primary,
                             )
                             else ButtonDefaults.outlinedButtonColors()
-                        ) { Text(index.toString()) }
+                        ) { Text((index + 1).toString()) }
                     }
                 }
 

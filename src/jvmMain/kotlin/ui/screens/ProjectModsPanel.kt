@@ -57,8 +57,9 @@ fun RowScope.ProjectModsPanel(onUpdateProject: (newProject: Project) -> Unit) {
 
     var showNewModWindow by remember { mutableStateOf(false) }
     if (showNewModWindow) AddModWindow(
-        { showNewModWindow = false },
-        onModAdded = doAsync { onUpdateProject(rebuild()) }
+        this@Project,
+        onCloseRequest = { showNewModWindow = false },
+        onUpdateProject = { onUpdateProject(it) }
     )
 
     Column(

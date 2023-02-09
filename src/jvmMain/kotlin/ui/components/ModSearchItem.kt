@@ -65,12 +65,9 @@ fun ModSearchItem(project: ProjectSearch, onModInstalled: () -> Unit) {
                 CircularProgressIndicator()
             }
 
-            val isModInstalled = remember {
-                modsList.filterIsInstance<Mod>()
-                    .filter { it.meta.update?.modrinth != null }
-                    .map { it.meta.update!!.modrinth!! }
-                    .find { modrinth -> modrinth.modId == project.id } != null
-            }
+            val installedMod = modsList.filterIsInstance<Mod>()
+                .filter { it.meta.update?.modrinth != null }
+                .find { it.meta.update!!.modrinth!!.modId == project.id }
             var installing by remember { mutableStateOf(false) }
             var removing by remember { mutableStateOf(false) }
 
@@ -86,11 +83,11 @@ fun ModSearchItem(project: ProjectSearch, onModInstalled: () -> Unit) {
                         Modifier.weight(1f),
                         style = MaterialTheme.typography.titleLarge,
                     )
-                    if (isModInstalled)
+                    if (installedMod != null)
                         IconButton(
                             onClick = doAsync {
                                 removing = true
-                                remove(project.id)
+                                installedMod.remove()
                                 onModInstalled()
                                 removing = false
                             },
@@ -114,9 +111,9 @@ fun ModSearchItem(project: ProjectSearch, onModInstalled: () -> Unit) {
                             onModInstalled()
                             installing = false
                         },
-                        enabled = !isModInstalled && !installing,
+                        enabled = installedMod == null && !installing,
                     ) {
-                        Text(if (isModInstalled) "Installed" else "Install")
+                        Text(if (installedMod != null) "Installed" else "Install")
                     }
                 }
             }
