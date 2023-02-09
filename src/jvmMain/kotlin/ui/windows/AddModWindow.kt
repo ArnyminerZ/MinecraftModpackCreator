@@ -2,12 +2,14 @@ package ui.windows
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.Window
 import data.packwiz.Project
 import ui.screens.AddModScreen
 import ui.theme.AppTheme
 
 context(Project)
+@ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
 @Composable
 fun AddModWindow(onCloseRequest: () -> Unit, onModAdded: () -> Unit) {

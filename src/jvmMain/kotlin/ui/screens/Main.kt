@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
@@ -16,10 +17,13 @@ import data.packwiz.Project
 import system.Config
 import ui.toolbar.MainToolbar
 import java.io.File
+import kotlinx.serialization.ExperimentalSerializationApi
 import ui.dialog.AlertDialogCompat
 import ui.windows.AddModWindow
 import utils.with
 
+@ExperimentalSerializationApi
+@ExperimentalComposeUiApi
 @Composable
 @Preview
 @ExperimentalMaterial3Api

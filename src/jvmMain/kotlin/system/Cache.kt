@@ -19,11 +19,11 @@ abstract class Cache <T> (namespace: String, private val name: String) {
         if (!namespaceCacheDir.exists()) namespaceCacheDir.mkdirs()
     }
 
-    internal abstract fun fetch()
+    internal abstract suspend fun fetch()
 
-    internal abstract fun read(): T
+    internal abstract suspend fun read(): T
 
-    abstract fun getOrFetch(): T
+    abstract suspend fun getOrFetch(): T
 
-    abstract fun image(): ImageBitmap?
+    abstract suspend fun image(): ImageBitmap?
 }

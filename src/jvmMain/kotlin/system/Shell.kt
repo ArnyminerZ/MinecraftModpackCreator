@@ -21,8 +21,11 @@ suspend fun String.runCommand(
     if (!proc.waitFor(5, TimeUnit.MINUTES)) {
         proc.destroy()
         cont.resumeWithException(RuntimeException("execution timed out: $this"))
-    } else if (proc.exitValue() != 0) {
-        cont.resumeWithException(RuntimeException("execution failed with code ${proc.exitValue()}: $this"))
-    } else
-        cont.resume(proc.inputStream.bufferedReader().readText())
+    } else {
+        val text = proc.inputStream.bufferedReader().readText()
+        if (proc.exitValue() != 0) {
+            cont.resumeWithException(RuntimeException("execution failed with code ${proc.exitValue()}: $this\n$text}"))
+        } else
+            cont.resume(text)
+    }
 }

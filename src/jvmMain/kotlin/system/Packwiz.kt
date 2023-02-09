@@ -112,4 +112,11 @@ object Packwiz {
         println("  Refresh: $result")
         return result.contains("Index refreshed")
     }
+
+    suspend fun installModrinth(modId: String, projectDir: File) {
+        println("Installing $modId from Modrinth in $projectDir...")
+        val packwiz = Config.get()["packwiz"]
+        val result = "$packwiz mr install $modId".runCommand(projectDir)
+        println("Result: $result")
+    }
 }

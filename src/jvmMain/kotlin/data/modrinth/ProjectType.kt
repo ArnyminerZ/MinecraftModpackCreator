@@ -1,5 +1,5 @@
 package data.modrinth
 
 enum class ProjectType {
-    mod, modpack, resourcepack
+    mod, modpack, resourcepack, shader
 }

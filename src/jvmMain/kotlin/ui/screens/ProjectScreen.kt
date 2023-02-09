@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import data.packwiz.Project
@@ -28,6 +29,7 @@ import ui.components.Sidebar
 import ui.data.SidebarItem
 
 context(SnackbarHostState, Project)
+@ExperimentalComposeUiApi
 @ExperimentalSerializationApi
 @ExperimentalMaterial3Api
 @Composable

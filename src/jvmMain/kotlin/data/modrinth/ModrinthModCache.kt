@@ -12,12 +12,12 @@ import system.Remote
 import system.json
 
 @ExperimentalSerializationApi
-class ModrinthCache(private val modId: String) : Cache<Project>("modrinth", modId) {
+class ModrinthModCache(private val modId: String) : Cache<Project>("modrinth", modId) {
     private val projectLock = ReentrantLock()
 
     private var project: Project? = null
 
-    override fun fetch() {
+    override suspend fun fetch() {
         Remote.inputStream("https://api.modrinth.com/v2/project/$modId", mapOf("Accept" to "application/json"))
             .use { input -> json.decodeFromStream<Project>(input) }
             .also { project = it }
@@ -27,9 +27,9 @@ class ModrinthCache(private val modId: String) : Cache<Project>("modrinth", modI
             }
     }
 
-    override fun read(): Project = mainCacheFile.inputStream().use { json.decodeFromStream(it) }
+    override suspend fun read(): Project = mainCacheFile.inputStream().use { json.decodeFromStream(it) }
 
-    override fun getOrFetch(): Project {
+    override suspend fun getOrFetch(): Project {
         project?.let { return it }
 
         projectLock.lock()
@@ -51,7 +51,7 @@ class ModrinthCache(private val modId: String) : Cache<Project>("modrinth", modI
         return project
     }
 
-    override fun image(): ImageBitmap? {
+    override suspend fun image(): ImageBitmap? {
         if (!imageCacheFile.exists())
             getOrFetch().iconUrl?.let { iconUrl ->
                 Remote.inputStream(iconUrl)

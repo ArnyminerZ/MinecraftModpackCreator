@@ -70,6 +70,8 @@ data class Project(private val packToml: File, val baseDir: File, val pack: Pack
         return Packwiz.refresh(baseDir)
     }
 
+    suspend fun remove(name: String) = Packwiz.remove(name, baseDir)
+
     suspend fun updateAll() = Packwiz.updateAll(baseDir)
 
     /**
@@ -77,4 +79,6 @@ data class Project(private val packToml: File, val baseDir: File, val pack: Pack
      */
     suspend fun rebuild(): Project = Packwiz.refresh(baseDir)
         .let { Builder(packToml).build() }
+
+    suspend fun installModrinth(modId: String) = Packwiz.installModrinth(modId, baseDir)
 }

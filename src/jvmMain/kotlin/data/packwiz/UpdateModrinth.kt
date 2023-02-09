@@ -1,6 +1,6 @@
 package data.packwiz
 
-import data.modrinth.ModrinthCache
+import data.modrinth.ModrinthModCache
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,5 +9,5 @@ data class UpdateModrinth(
     @SerialName("mod-id") val modId: String,
     val version: String,
 ) {
-    fun cache() = ModrinthCache(modId)
+    fun cache() = ModrinthModCache(modId)
 }
