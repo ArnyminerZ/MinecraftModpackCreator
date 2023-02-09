@@ -39,7 +39,7 @@ kotlin {
                 implementation(compose.materialIconsExtended)
                 implementation("org.apache.maven:maven-artifact:3.6.3")
                 implementation("com.akuleshov7:ktoml-core:0.4.0")
-                implementation("com.akuleshov7:ktoml-file:0.4.0")
+                implementation("com.akuleshov7:ktoml-file:0.4.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.4.1")
             }
         }
