@@ -31,7 +31,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import data.packwiz.Mod
+import data.packwiz.ModJar
 import data.packwiz.ModMeta
+import data.packwiz.ModModel
 import data.packwiz.ModSide
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,17 +49,22 @@ import utils.doAsync
 @ExperimentalSerializationApi
 @ExperimentalMaterial3Api
 @Composable
-fun ModItem(modMeta: ModMeta, updateAvailable: Boolean, onUpdateRequested: suspend () -> Unit, onRemoveRequested: suspend () -> Unit) {
+fun ModItem(
+    mod: ModModel,
+    updateAvailable: Boolean,
+    onUpdateRequested: (suspend () -> Unit)?,
+    onRemoveRequested: suspend () -> Unit
+) {
     val localInspectionMode = LocalInspectionMode.current
 
     var showDeletionDialog by remember { mutableStateOf(false) }
     if (showDeletionDialog)
         AlertDialogCompat(
             onDismissRequest = { showDeletionDialog = false },
-            confirmButton = DialogButton("Delete", doAsync { onRemoveRequested() }),
+            confirmButton = DialogButton("Delete", doAsync { onRemoveRequested(); showDeletionDialog = false }),
             dismissButton = DialogButton("Cancel") { showDeletionDialog = false },
             title = "Deletion",
-            text = "Are you sure that you want to remove ${modMeta.name}? This cannot be undone.",
+            text = "Are you sure that you want to remove ${mod.name}? This cannot be undone.",
         )
 
     Card(
@@ -66,8 +74,9 @@ fun ModItem(modMeta: ModMeta, updateAvailable: Boolean, onUpdateRequested: suspe
     ) {
         var bitmap: ImageBitmap? by remember { mutableStateOf(null) }
 
-        val modrinth = modMeta.update?.modrinth
-        val curseForge = modMeta.update?.curseForge
+        val modMeta = if (mod is Mod) mod.meta else null
+        val modrinth = modMeta?.update?.modrinth
+        val curseForge = modMeta?.update?.curseForge
 
         // Load bitmap only if not in preview mode
         if (!localInspectionMode)
@@ -89,10 +98,12 @@ fun ModItem(modMeta: ModMeta, updateAvailable: Boolean, onUpdateRequested: suspe
         Row(
             modifier = Modifier.fillMaxWidth(1f),
         ) {
-            if (localInspectionMode)
+            if (mod is ModJar)
+                Image(painterResource("java.svg"), mod.name, Modifier.size(90.dp))
+            else if (localInspectionMode)
                 Box(Modifier.size(90.dp).background(Color.Black))
             else
-                bitmap?.let { Image(it, modMeta.name, Modifier.size(90.dp)) } ?: Spacer(Modifier.size(90.dp))
+                bitmap?.let { Image(it, mod.name, Modifier.size(90.dp)) } ?: Spacer(Modifier.size(90.dp))
 
             Column(
                 Modifier.weight(1f)
@@ -100,17 +111,10 @@ fun ModItem(modMeta: ModMeta, updateAvailable: Boolean, onUpdateRequested: suspe
             ) {
                 Row {
                     Text(
-                        modMeta.name,
+                        mod.name,
                         Modifier
                             .weight(1f),
                         style = MaterialTheme.typography.titleMedium,
-                    )
-                    Icon(
-                        Icons.Rounded.Refresh,
-                        "Refresh",
-                        Modifier.size(22.dp)
-                            .padding(end = 4.dp)
-                            .clickable {  },
                     )
                     if (modrinth != null)
                         Image(
@@ -118,36 +122,36 @@ fun ModItem(modMeta: ModMeta, updateAvailable: Boolean, onUpdateRequested: suspe
                             "Modrinth",
                             modifier = Modifier.size(22.dp),
                         )
-                    if (curseForge != null)
+                    else if (curseForge != null)
                         Image(
                             painterResource("curseforge.svg"),
                             "Curseforge",
                             modifier = Modifier.size(22.dp),
                         )
                 }
-                if (modMeta.side == ModSide.client)
-                    Chip("Client")
-                else if (modMeta.side == ModSide.server)
-                    Chip("Server")
+                if (mod is Mod)
+                    if (mod.meta.side == ModSide.client)
+                        Chip("Client")
+                    else if (mod.meta.side == ModSide.server)
+                        Chip("Server")
 
                 Spacer(Modifier.weight(1f))
 
                 Row {
                     var updateButtonEnabled by remember { mutableStateOf(true) }
-                    var deleteButtonEnabled by remember { mutableStateOf(true) }
 
+                    if (onUpdateRequested != null)
+                        TextButton(
+                            enabled = updateAvailable && updateButtonEnabled,
+                            onClick = doAsync {
+                                updateButtonEnabled = false
+                                onUpdateRequested()
+                                updateButtonEnabled = true
+                            },
+                        ) {
+                            Text("Check for updates")
+                        }
                     TextButton(
-                        enabled = updateAvailable && updateButtonEnabled,
-                        onClick = doAsync {
-                            updateButtonEnabled = false
-                            onUpdateRequested()
-                            updateButtonEnabled = true
-                        },
-                    ) {
-                        Text("Check for updates")
-                    }
-                    TextButton(
-                        enabled = deleteButtonEnabled,
                         onClick = { showDeletionDialog = true },
                     ) {
                         Text("Remove")
@@ -163,5 +167,5 @@ fun ModItem(modMeta: ModMeta, updateAvailable: Boolean, onUpdateRequested: suspe
 @Composable
 @Preview
 fun ModItemPreview() {
-    ModItem(ModMeta.SampleModrinth, true, {}, {})
+    ModItem(Mod.SampleModrinth, true, {}, {})
 }

@@ -101,4 +101,15 @@ object Packwiz {
         val result = "$packwiz remove $name".runCommand(projectDir)
         return result.contains("removed successfully")
     }
+
+    /**
+     * Runs the refresh command on the project's directory.
+     */
+    suspend fun refresh(projectDir: File): Boolean {
+        println("Refreshing $projectDir...")
+        val packwiz = Config.get()["packwiz"]
+        val result = "$packwiz refresh".runCommand(projectDir)
+        println("  Refresh: $result")
+        return result.contains("Index refreshed")
+    }
 }

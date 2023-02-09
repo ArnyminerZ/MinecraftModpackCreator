@@ -9,9 +9,11 @@ import kotlinx.serialization.serializer
 import java.io.File
 import java.io.FileFilter
 import java.io.FileNotFoundException
+import java.io.IOException
 import system.Packwiz
+import utils.then
 
-data class Project(private val packToml: File, val baseDir: File, val pack: Pack, val modsList: List<Mod>) {
+data class Project(private val packToml: File, val baseDir: File, val pack: Pack, val modsList: List<ModModel>) {
     class Builder(private val packToml: File) {
         /**
          * Initializes a new project.
@@ -25,16 +27,23 @@ data class Project(private val packToml: File, val baseDir: File, val pack: Pack
             val pack = TomlFileReader.decodeFromFile<Pack>(serializer(), packToml.path)
 
             val modsDir = File(baseDir, "mods")
-            val modsList = arrayListOf<Mod>()
+            val modsList = arrayListOf<ModModel>()
             println("Mods list:")
             modsDir.listFiles(FileFilter { it.extension == "toml" })?.forEach { toml ->
                 println("  - $toml")
                 modsList += Mod(toml, TomlFileReader.decodeFromFile(serializer(), toml.path))
             }
+            println("Jar mods list:")
+            modsDir.listFiles(FileFilter { it.extension == "jar" })?.forEach { jar ->
+                println("  - $jar")
+                modsList += ModJar(jar)
+            }
 
             return Project(packToml, baseDir, pack, modsList)
         }
     }
+
+    private val modsDir = File(baseDir, "mods")
 
     /**
      * Writes the contents of the current [pack] into the pack.toml file.
@@ -46,10 +55,26 @@ data class Project(private val packToml: File, val baseDir: File, val pack: Pack
         return this
     }
 
+    /**
+     * Adds the given .jar [file] to the mods list, generating a `.pw.toml` file automatically.
+     * @param file The `.jar` file to be added.
+     * @throws NoSuchFileException If the source file doesn't exist.
+     * @throws FileAlreadyExistsException If the destination file already exists.
+     * @throws IOException If any error occurs while adding.
+     */
+    suspend fun add(file: File): Boolean {
+        if (file.extension != "jar") throw IllegalArgumentException("The file must be a .jar file. File: $file")
+        // First copy the .jar file into the mods folder
+        file.copyTo(File(modsDir, file.name))
+        // Run the refresh command so the toml file gets generated and the mod indexed
+        return Packwiz.refresh(baseDir)
+    }
+
     suspend fun updateAll() = Packwiz.updateAll(baseDir)
 
     /**
      * Rebuilds the current project class, refreshing its contents in the process.
      */
-    fun rebuild(): Project = Builder(packToml).build()
+    suspend fun rebuild(): Project = Packwiz.refresh(baseDir)
+        .let { Builder(packToml).build() }
 }

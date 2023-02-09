@@ -4,7 +4,13 @@ import java.io.File
 import system.Packwiz
 import utils.then
 
-data class Mod(val tomlFile: File, val meta: ModMeta) {
+data class Mod(val tomlFile: File, val meta: ModMeta): ModModel {
+    companion object {
+        val Sample = Mod(File(""), ModMeta.Sample)
+        val SampleModrinth = Sample.copy(meta = ModMeta.SampleModrinth)
+    }
+
+    override val name: String = meta.name
 
     /**
      * Tries to update the given mod to the latest available version.
@@ -18,6 +24,5 @@ data class Mod(val tomlFile: File, val meta: ModMeta) {
      * @return `true` if the mod has been deleted. `false` if it could not have been deleted.
      */
     context(Project)
-    suspend fun remove() = Packwiz.remove(tomlFile.name.replace(".pw.toml", ""), this@Project.baseDir)
-        .then { rebuild() }
+    override suspend fun remove() = Packwiz.remove(tomlFile.name.replace(".pw.toml", ""), this@Project.baseDir)
 }

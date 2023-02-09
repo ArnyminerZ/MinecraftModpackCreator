@@ -17,6 +17,7 @@ import system.Config
 import ui.toolbar.MainToolbar
 import java.io.File
 import ui.dialog.AlertDialogCompat
+import ui.windows.AddModWindow
 import utils.with
 
 @Composable

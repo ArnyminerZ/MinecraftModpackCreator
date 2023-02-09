@@ -23,10 +23,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import data.packwiz.Project
+import kotlinx.serialization.ExperimentalSerializationApi
 import ui.components.Sidebar
 import ui.data.SidebarItem
 
 context(SnackbarHostState, Project)
+@ExperimentalSerializationApi
 @ExperimentalMaterial3Api
 @Composable
 fun ProjectScreen(modifier: Modifier = Modifier, onUpdateProject: (project: Project) -> Unit) {
@@ -43,7 +45,7 @@ fun ProjectScreen(modifier: Modifier = Modifier, onUpdateProject: (project: Proj
 
             when(selectedMenu) {
                 0 -> ProjectGeneralPanel(onUpdateProject)
-                1 -> ProjectModsPanel()
+                1 -> ProjectModsPanel(onUpdateProject)
             }
         }
         Text(

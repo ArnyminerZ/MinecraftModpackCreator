@@ -1,5 +1,6 @@
 package ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -30,22 +32,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import data.packwiz.Mod
+import data.packwiz.ModJar
 import data.packwiz.Project
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import ui.components.ModItem
+import ui.windows.AddModWindow
 import utils.async
+import utils.doAsync
 
 context(SnackbarHostState, Project)
 @ExperimentalSerializationApi
 @ExperimentalMaterial3Api
 @Composable
-fun RowScope.ProjectModsPanel() {
+fun RowScope.ProjectModsPanel(onUpdateProject: (newProject: Project) -> Unit) {
     val scope = rememberCoroutineScope()
+
+    var showNewModWindow by remember { mutableStateOf(false) }
+    if (showNewModWindow) AddModWindow(
+        { showNewModWindow = false },
+        onModAdded = doAsync { onUpdateProject(rebuild()) }
+    )
 
     Column(
         modifier = Modifier
@@ -101,6 +113,11 @@ fun RowScope.ProjectModsPanel() {
                 ) {
                     Text("Update All")
                 }
+                TextButton(
+                    onClick = { showNewModWindow = true },
+                ) {
+                    Text("Add")
+                }
             }
         }
 
@@ -112,18 +129,26 @@ fun RowScope.ProjectModsPanel() {
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(modsList.filter { it.meta.name.contains(search, true) }) { mod ->
+                val filtered = modsList.filter {
+                    when (it) {
+                        is Mod -> it.meta.name.contains(search, true)
+                        is ModJar -> it.jarFile.name.contains(search, true)
+                        else -> true
+                    }
+                }
+                items(filtered) { mod ->
                     ModItem(
-                        mod.meta, !updating,
-                        onUpdateRequested = {
-                            async {
+                        mod, !updating,
+                        onUpdateRequested = object : suspend () -> Unit {
+                            override suspend fun invoke() {
+                                mod as Mod
                                 val updated = mod.update()
                                 if (updated)
                                     scope.launch { showSnackbar("Mod Updated successfully!") }
                                 else
                                     scope.launch { showSnackbar("No updates available!") }
                             }
-                        },
+                        }.takeIf { mod is Mod },
                         onRemoveRequested = {
                             async {
                                 val deleted = mod.remove()
@@ -131,9 +156,20 @@ fun RowScope.ProjectModsPanel() {
                                     scope.launch { showSnackbar("Mod deleted successfully!") }
                                 else
                                     scope.launch { showSnackbar("Deletion error!") }
+                                onUpdateProject(rebuild())
                             }
                         },
                     )
+                }
+                item {
+                    AnimatedVisibility(filtered.isEmpty()) {
+                        Text(
+                            "No mods found.",
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
                 }
             }
         }
