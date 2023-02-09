@@ -82,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-jar
-          path: /build/compose/jars/*.jar
+          path: ./build/compose/jars/*.jar
           if-no-files-found: error
 
       - name: Uploading ${{ matrix.os }} native package
@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-package
-          path: /build/compose/binaries/main/**/*
+          path: ./build/compose/binaries/main/**/*
           if-no-files-found: error
 
 
