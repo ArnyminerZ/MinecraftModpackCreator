@@ -54,8 +54,7 @@ jobs:
         if: always() && steps.download-jdk.outcome == 'success'
         with:
           distribution: 'corretto'
-          java-version: ${{ env.JDK_VERSION }}
-          jdkFile: ${{ env.JDK_FILE }}
+          java-version: ${{ matrix.jdk }}
 
       - name: Cache Gradle dependencies
         uses: actions/cache@v3.0.8
