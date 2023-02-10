@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.ExperimentalSerializationApi
 import system.storage.Config
+import system.storage.ConfigKey
 import ui.dialog.AlertDialogCompat
 import ui.toolbar.MainToolbar
 import ui.windows.NewProjectWindow
@@ -49,7 +50,7 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
     val config = remember { Config.get() }
     val snackbarHostState = SnackbarHostState()
 
-    val currentProjectDir by remember { config.state("current-project") }
+    val currentProjectDir: String? by remember { config.state(ConfigKey.Project) }
     var currentProject: Project? by remember { mutableStateOf(null) }
     var loadingProject by remember { mutableStateOf(false) }
 
@@ -88,7 +89,7 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
             System.err.println("Could not decode pack.toml ($path).")
             e.printStackTrace()
 
-            config.delete("current-project")
+            config.delete(ConfigKey.Project)
             loadingProject = false
 
             val result = snackbarHostState.showSnackbar("Could not decode modpack toml file.", "View error")
@@ -96,7 +97,7 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
         } catch (e: Exception) {
             e.printStackTrace()
 
-            config.delete("current-project")
+            config.delete(ConfigKey.Project)
             loadingProject = false
 
             snackbarHostState.showSnackbar("Could not load project.")
@@ -130,9 +131,9 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
                 MainToolbar(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                     onCreateProject = { showNewProjectWindow = true },
-                    onProjectPicked = { config["current-project"] = it.path },
+                    onProjectPicked = { config[ConfigKey.Project] = it.path },
                     isCloseProjectAvailable = currentProject != null,
-                    onCloseProjectRequested = { config.delete("current-project") },
+                    onCloseProjectRequested = { config.delete(ConfigKey.Project) },
                 )
             },
             snackbarHost = { SnackbarHost(snackbarHostState) },

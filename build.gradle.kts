@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -42,6 +41,7 @@ kotlin {
                 implementation("com.akuleshov7:ktoml-file:0.4.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.4.1")
                 implementation("com.darkrockstudios:mpfilepicker:1.0.0")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
             }
         }
         val jvmTest by getting

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.serialization.ExperimentalSerializationApi
 import system.Packwiz
 import system.storage.Config
+import system.storage.ConfigKey
 import ui.screens.MainScreen
 import ui.theme.AppTheme
 
@@ -25,13 +26,13 @@ import ui.theme.AppTheme
 fun ApplicationScope.MainWindow() {
     val config = remember { Config.get() }
     var showPackwizConfigure by remember { mutableStateOf(false) }
-    val packwizPath by remember { config.state("packwiz") }
+    val packwizPath: String? by config.state(ConfigKey.Packwiz)
 
     var mainWindowTitle by remember { mutableStateOf("Modpack Creator") }
 
     suspend fun findPackwiz() {
         try {
-            config["packwiz"] = Packwiz.search()
+            config[ConfigKey.Packwiz] = Packwiz.search()
         } catch (e: UnsupportedOperationException) {
             println("Packwiz not supported. Showing configuration screen...")
             showPackwizConfigure = true

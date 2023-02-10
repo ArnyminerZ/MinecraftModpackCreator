@@ -7,6 +7,7 @@ import data.packwiz.UpdateResult
 import java.io.File
 import java.io.IOException
 import system.storage.Config
+import system.storage.ConfigKey
 
 object Packwiz {
     /**
@@ -68,7 +69,7 @@ object Packwiz {
      */
     suspend fun update(name: String, projectDir: File): Boolean {
         println("Trying to update mod $name...")
-        val packwiz = Config.get()["packwiz"]
+        val packwiz: String? = Config.get()[ConfigKey.Packwiz]
         val result = "$packwiz update $name".runCommand(projectDir)
         println("Update response: $result")
         if (result.contains("already up to date"))
@@ -78,7 +79,7 @@ object Packwiz {
 
     suspend fun updateAll(projectDir: File): List<UpdateResult> {
         println("Trying to update all mods...")
-        val packwiz = Config.get()["packwiz"]
+        val packwiz: String? = Config.get()[ConfigKey.Packwiz]
         val resultLines = "$packwiz update -a -y".runCommand(projectDir).split('\n')
         return resultLines
             .filter { it.contains("->") }
@@ -99,7 +100,7 @@ object Packwiz {
      */
     suspend fun remove(name: String, projectDir: File): Boolean {
         println("Removing mod $name...")
-        val packwiz = Config.get()["packwiz"]
+        val packwiz: String? = Config.get()[ConfigKey.Packwiz]
         val result = "$packwiz remove $name".runCommand(projectDir)
         return result.contains("removed successfully")
     }
@@ -109,7 +110,7 @@ object Packwiz {
      */
     suspend fun refresh(projectDir: File): Boolean {
         println("Refreshing $projectDir...")
-        val packwiz = Config.get()["packwiz"]
+        val packwiz: String? = Config.get()[ConfigKey.Packwiz]
         val result = "$packwiz refresh".runCommand(projectDir)
         println("  Refresh: $result")
         return result.contains("Index refreshed")
@@ -117,7 +118,7 @@ object Packwiz {
 
     suspend fun installModrinth(modId: String, projectDir: File) {
         println("Installing $modId from Modrinth in $projectDir...")
-        val packwiz = Config.get()["packwiz"]
+        val packwiz: String? = Config.get()[ConfigKey.Packwiz]
         val result = "$packwiz mr install $modId".runCommand(projectDir)
         println("Result: $result")
     }
@@ -132,7 +133,7 @@ object Packwiz {
         modLoaderVersion: Version,
     ): Project {
         println("Creating new project in $directory for $minecraftVersion...")
-        val packwiz = Config.get().getValue("packwiz")
+        val packwiz: String = Config.get().getValue(ConfigKey.Packwiz)
         arrayOf(
             packwiz, "init",
             "--name", name,
