@@ -146,8 +146,6 @@ object Packwiz {
             "--${modLoaderVersion.loaderName}-version", modLoaderVersion.name,
         ).runCommand(directory)
 
-        // TODO: Set description
-
         return Project.Builder(File(directory, "pack.toml"))
             .build()
             .let { project ->
