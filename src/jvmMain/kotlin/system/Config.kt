@@ -1,6 +1,7 @@
 package system
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import java.io.File
 import utils.addTo
@@ -34,6 +35,10 @@ class Config private constructor(dataDir: File) {
     @Volatile
     private var observers = mapOf<String, List<(value: String?) -> Unit>>()
 
+    /** Stores all the states listening for updates */
+    @Volatile
+    private var states = mapOf<String, List<MutableState<String?>>>()
+
     /** The file where all the configuration data is stored. */
     private val configFile = File(dataDir, "config.properties")
 
@@ -48,6 +53,7 @@ class Config private constructor(dataDir: File) {
                     writer.write("$key=$value\n")
             }
         observers.forEach { (k, l) -> l.forEach { it(entries[k]) } }
+        states.forEach { (k, ls) -> ls.forEach { it.value = entries[k] } }
     }
 
     /** Reads all the data from the config file, and returns a map of key-value entries. */
@@ -89,7 +95,6 @@ class Config private constructor(dataDir: File) {
         observers = observers.toMutableMap().addTo(key, observer)
     }
 
-    fun state(key: String): MutableState<String?> = mutableStateOf(get(key)).apply {
-        observe(key) { this.value = it }
-    }
+    fun state(key: String): State<String?> = mutableStateOf(get(key))
+        .also { states = states.toMutableMap().addTo(key, it) }
 }
