@@ -1,9 +1,10 @@
-package system
+package system.storage
 
 import androidx.compose.ui.graphics.ImageBitmap
 import java.io.File
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import system.FileSystem
 
 val json = Json { ignoreUnknownKeys = true }
 

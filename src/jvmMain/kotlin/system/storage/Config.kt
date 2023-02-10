@@ -1,11 +1,11 @@
-package system
+package system.storage
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import java.io.File
+import system.FileSystem
 import utils.addTo
-import utils.append
 
 /**
  * A Singleton for managing the project's configuration. Stores all the configuration in the user's data dir
