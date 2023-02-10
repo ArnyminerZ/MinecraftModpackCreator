@@ -1,6 +1,5 @@
 package ui.screens
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,22 +27,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
-import data.common.Manifest
 import data.common.Version
-import data.minecraft.MinecraftVersion
 import data.minecraft.MinecraftManifest
+import data.minecraft.MinecraftVersion
 import data.minecraft.VersionType
-import data.liteloader.LiteLoaderManifest
 import data.packwiz.ModLoader
 import data.packwiz.Project
 import java.io.File
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
-import system.Fabric
-import system.Liteloader
 import system.ManifestProvider
 import system.Minecraft
 import system.Packwiz
@@ -115,13 +109,7 @@ fun NewProjectScreen(onProjectCreated: (project: Project) -> Unit) {
             if (minecraftVersion == null) return@LaunchedEffect
 
             loading = true
-            val provider: ManifestProvider<*>? = when (modLoader) {
-                ModLoader.liteloader -> Liteloader
-                ModLoader.fabric -> Fabric
-                ModLoader.forge -> null
-                ModLoader.quilt -> null
-                else -> null
-            }
+            val provider: ManifestProvider<*>? = modLoader?.provider
             val manifest = withContext(Dispatchers.IO) { provider?.manifest(minecraftVersion!!) }
 
             modLoaderVersionsHolder = manifest?.getVersions()

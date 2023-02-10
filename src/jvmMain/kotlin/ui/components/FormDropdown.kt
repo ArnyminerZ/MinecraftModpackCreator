@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import data.common.StatusProvider
 
 @Composable
 fun <T> FormDropdown(
@@ -50,7 +51,10 @@ fun <T> FormDropdown(
         )
         DropdownMenuCompat(expanded, onDismissRequest = { expanded = !expanded }) {
             for (item in items) {
-                DropdownMenuItemCompat(item.toString()) { onItemSelected(item); expanded = false }
+                DropdownMenuItemCompat(
+                    item.toString(),
+                    enabled = if (item is StatusProvider) item.enabled else true,
+                ) { onItemSelected(item); expanded = false }
             }
         }
     }

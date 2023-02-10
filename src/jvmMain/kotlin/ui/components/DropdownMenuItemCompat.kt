@@ -1,6 +1,5 @@
 package ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.DropdownMenuItem
@@ -29,6 +28,9 @@ fun DropdownMenuItemCompat(
     ) {
         leadingIcon?.let { Icon(it, text, Modifier.padding(end = 8.dp)) }
         leadingImage?.let { Icon(it, text, Modifier.padding(end = 8.dp)) }
-        Text(text)
+        Text(
+            text,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.3f),
+        )
     }
 }

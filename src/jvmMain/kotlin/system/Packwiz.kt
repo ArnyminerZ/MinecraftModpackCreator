@@ -1,15 +1,11 @@
 package system
 
-import com.lordcodes.turtle.shellRun
 import data.common.Version
 import data.minecraft.MinecraftVersion
 import data.packwiz.Project
 import data.packwiz.UpdateResult
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
-import utils.quoted
 
 object Packwiz {
     /**
