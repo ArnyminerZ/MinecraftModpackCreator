@@ -5,13 +5,12 @@ import com.akuleshov7.ktoml.TomlOutputConfig
 import com.akuleshov7.ktoml.exceptions.TomlDecodingException
 import com.akuleshov7.ktoml.file.TomlFileReader
 import com.akuleshov7.ktoml.file.TomlFileWriter
-import kotlinx.serialization.serializer
 import java.io.File
 import java.io.FileFilter
 import java.io.FileNotFoundException
 import java.io.IOException
+import kotlinx.serialization.serializer
 import system.Packwiz
-import utils.then
 
 data class Project(private val packToml: File, val baseDir: File, val pack: Pack, val modsList: List<ModModel>) {
     class Builder(private val packToml: File) {
@@ -19,9 +18,11 @@ data class Project(private val packToml: File, val baseDir: File, val pack: Pack
          * Initializes a new project.
          * @throws FileNotFoundException If the given index file doesn't exist.
          * @throws TomlDecodingException If there's an error while decoding a toml file.
+         * @throws IllegalArgumentException If the path of the [packToml] file contains a `|` character.
          */
         fun build(): Project {
             if (!packToml.exists()) throw FileNotFoundException("The given pack.toml file ($packToml) doesn't exist.")
+            if (packToml.path.contains("|")) throw IllegalArgumentException("The path of the given pack.toml file ($packToml) contains an illegal character (|).")
 
             val baseDir = packToml.parentFile
             val pack = TomlFileReader.decodeFromFile<Pack>(serializer(), packToml.path)
