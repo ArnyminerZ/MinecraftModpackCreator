@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import system.Config
@@ -24,6 +25,8 @@ fun ApplicationScope.MainWindow() {
     val config = remember { Config.get() }
     var showPackwizConfigure by remember { mutableStateOf(false) }
     val packwizPath by remember { config.state("packwiz") }
+
+    var mainWindowTitle by remember { mutableStateOf("Modpack Creator") }
 
     suspend fun findPackwiz() {
         try {
@@ -45,9 +48,9 @@ fun ApplicationScope.MainWindow() {
             }
     }
 
-    Window(onCloseRequest = ::exitApplication) {
+    Window(onCloseRequest = ::exitApplication, title = mainWindowTitle) {
         AppTheme {
-            MainScreen()
+            MainScreen { mainWindowTitle = "Modpack Creator - ${it.pack.name}" }
         }
     }
 

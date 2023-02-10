@@ -17,6 +17,7 @@ import data.packwiz.Project
 import system.Config
 import ui.toolbar.MainToolbar
 import java.io.File
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.ExperimentalSerializationApi
 import ui.dialog.AlertDialogCompat
 import ui.windows.AddModWindow
@@ -27,7 +28,7 @@ import utils.with
 @Composable
 @Preview
 @ExperimentalMaterial3Api
-fun ApplicationScope.MainScreen() {
+fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
     val config = remember { Config.get() }
     val snackbarHostState = SnackbarHostState()
 
@@ -88,6 +89,13 @@ fun ApplicationScope.MainScreen() {
                 if (projectDir == null) return@collect
                 loadProject(projectDir)
             }
+    }
+
+    LaunchedEffect(currentProject) {
+        snapshotFlow { currentProject }
+            .distinctUntilChanged()
+            .filterNotNull()
+            .collect { onProjectLoaded(it) }
     }
 
     MaterialTheme {
