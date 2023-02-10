@@ -1,15 +1,14 @@
 package data.modrinth
 
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.loadImageBitmap
 import java.util.concurrent.locks.ReentrantLock
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import system.Cache
 import system.Remote
-import system.json
+import system.storage.Cache
+import system.storage.json
 
 @ExperimentalSerializationApi
 class ModrinthCategoriesCache : Cache<List<Category>>("modrinth", "meta-categories") {

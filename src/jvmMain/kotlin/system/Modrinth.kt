@@ -8,6 +8,7 @@ import java.net.URLEncoder
 import java.util.concurrent.locks.ReentrantLock
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
+import system.storage.json
 
 /**
  * Provides an interface for making requests to Modrinth.

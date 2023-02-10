@@ -13,8 +13,8 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.serialization.ExperimentalSerializationApi
-import system.Config
 import system.Packwiz
+import system.storage.Config
 import ui.screens.MainScreen
 import ui.theme.AppTheme
 

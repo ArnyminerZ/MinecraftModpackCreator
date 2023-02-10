@@ -7,9 +7,9 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import system.Cache
 import system.Remote
-import system.json
+import system.storage.Cache
+import system.storage.json
 
 @ExperimentalSerializationApi
 class ModrinthModCache(private val modId: String) : Cache<Project>("modrinth", modId) {
