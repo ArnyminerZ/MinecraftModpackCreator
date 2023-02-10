@@ -1,10 +1,15 @@
 package system
 
+import com.lordcodes.turtle.shellRun
+import data.common.Version
+import data.minecraft.MinecraftVersion
+import data.packwiz.Project
 import data.packwiz.UpdateResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
+import utils.quoted
 
 object Packwiz {
     /**
@@ -118,5 +123,41 @@ object Packwiz {
         val packwiz = Config.get()["packwiz"]
         val result = "$packwiz mr install $modId".runCommand(projectDir)
         println("Result: $result")
+    }
+
+    suspend fun createProject(
+        directory: File,
+        name: String,
+        description: String,
+        author: String,
+        version: String,
+        minecraftVersion: MinecraftVersion,
+        modLoaderVersion: Version,
+    ): Project {
+        println("Creating new project in $directory for $minecraftVersion...")
+        val packwiz = Config.get().getValue("packwiz")
+        arrayOf(
+            packwiz, "init",
+            "--name", name,
+            "--version", version,
+            "--author", author,
+            "--mc-version", minecraftVersion.id,
+            "--modloader", modLoaderVersion.loaderName,
+            "--${modLoaderVersion.loaderName}-version", modLoaderVersion.name,
+        ).runCommand(directory)
+
+        // TODO: Set description
+
+        return Project.Builder(File(directory, "pack.toml"))
+            .build()
+            .let { project ->
+                if (description.isNotBlank())
+                    project
+                        .copy(pack = project.pack.copy(description = description))
+                        .save()
+                        .rebuild()
+                else
+                    project
+            }
     }
 }

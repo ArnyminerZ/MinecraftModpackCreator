@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.akuleshov7.ktoml.exceptions.TomlDecodingException
+import com.darkrockstudios.libraries.mpfilepicker.FilePicker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -22,7 +23,6 @@ import system.runCommand
 import ui.components.ActionCard
 import ui.components.ErrorActionCard
 import ui.components.LoadingCard
-import ui.dialog.FileDialog
 import java.awt.Frame
 import java.io.IOException
 import java.net.URI
@@ -41,8 +41,7 @@ fun ConfigurePackwizScreen(parent: Frame? = null, onPathFound: (path: String) ->
     var goVersion: ComparableVersion? by remember { mutableStateOf(null) }
     var isGoVersionFine: Boolean? by remember { mutableStateOf(null) }
 
-    if (choosingPackwiz)
-        FileDialog(parent) { choosingPackwiz = false; if (it != null) packwizPath = it.path }
+    FilePicker(choosingPackwiz) { choosingPackwiz = false; if (it != null) packwizPath = it }
 
     LaunchedEffect(isGoAvailable) {
         CoroutineScope(Dispatchers.IO).launch {

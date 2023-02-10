@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.ExperimentalSerializationApi
 import ui.dialog.AlertDialogCompat
 import ui.windows.AddModWindow
+import ui.windows.NewProjectWindow
 import utils.with
 
 @ExperimentalSerializationApi
@@ -36,8 +37,17 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
     var currentProject: Project? by remember { mutableStateOf(null) }
     var loadingProject by remember { mutableStateOf(false) }
 
-    var error: String? by remember { mutableStateOf(null) }
+    var showNewProjectWindow by remember { mutableStateOf(false) }
+    if (showNewProjectWindow)
+        NewProjectWindow(
+            onCloseRequest = { showNewProjectWindow = false },
+            onProjectCreated = {
+                currentProject = it
+                showNewProjectWindow = false
+            },
+        )
 
+    var error: String? by remember { mutableStateOf(null) }
     if (error != null)
         AlertDialogCompat(
             onDismissRequest = { error = null },
@@ -103,6 +113,7 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
             topBar = {
                 MainToolbar(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                    onCreateProject = { showNewProjectWindow = true },
                     onProjectPicked = { config["current-project"] = it.path },
                     isCloseProjectAvailable = currentProject != null,
                     onCloseProjectRequested = { config.delete("current-project") },

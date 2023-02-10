@@ -1,21 +1,22 @@
 package ui.windows
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.rememberWindowState
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.serialization.ExperimentalSerializationApi
 import system.Config
 import system.Packwiz
-import ui.dialog.FileDialog
 import ui.screens.MainScreen
 import ui.theme.AppTheme
-import java.io.File
-import java.io.FilenameFilter
-import kotlinx.serialization.ExperimentalSerializationApi
 
 @ExperimentalSerializationApi
 @ExperimentalComposeUiApi

@@ -15,7 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
-import ui.dialog.FileDialog
+import com.darkrockstudios.libraries.mpfilepicker.FilePicker
 import java.io.File
 import ui.components.DropdownMenuCompat
 import ui.components.DropdownMenuItemCompat
@@ -24,19 +24,19 @@ import ui.components.DropdownMenuItemCompat
 @ExperimentalMaterial3Api
 fun ApplicationScope.MainToolbar(
     modifier: Modifier = Modifier,
+    onCreateProject: () -> Unit,
     onProjectPicked: (indexToml: File) -> Unit,
     isCloseProjectAvailable: Boolean,
     onCloseProjectRequested: () -> Unit,
 ) {
     var showProjectPicker by remember { mutableStateOf(false) }
-    if (showProjectPicker)
-        FileDialog(
-            title = "Choose a project file",
-            filter = { _, name -> name == "pack.toml" },
-        ) { file ->
-            if (file != null) onProjectPicked(file)
-            showProjectPicker = false
-        }
+    FilePicker(
+        showProjectPicker,
+        fileExtension = "pack.toml",
+    ) { file ->
+        file?.let { File(it) }?.let(onProjectPicked)
+        showProjectPicker = false
+    }
 
     Card(
         modifier = modifier,
@@ -57,7 +57,7 @@ fun ApplicationScope.MainToolbar(
                 ) {
                     DropdownMenuItemCompat(
                         "New Project",
-                        onClick = {},
+                        onClick = { onCreateProject(); expanded = false },
                     )
                     DropdownMenuItemCompat(
                         "Open Project",
@@ -66,7 +66,7 @@ fun ApplicationScope.MainToolbar(
                     if (isCloseProjectAvailable)
                         DropdownMenuItemCompat(
                             "Close Project",
-                            onClick = onCloseProjectRequested,
+                            onClick = { onCloseProjectRequested(); expanded = false },
                         )
                     Divider()
                     DropdownMenuItemCompat(

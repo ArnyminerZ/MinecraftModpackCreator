@@ -36,7 +36,7 @@ fun AddLocalModScreen(onModAdded: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
-            filter = { _, f -> f.endsWith(".jar") },
+            fileExtension = "jar",
         ) { file = it }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             OutlinedButton(

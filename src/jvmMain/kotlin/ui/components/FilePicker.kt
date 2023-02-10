@@ -12,25 +12,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import java.io.File
-import java.io.FilenameFilter
-import ui.dialog.FileDialog
 
 @Composable
 fun FilePicker(
     file: File?,
     modifier: Modifier = Modifier,
     label: String = "Pick a file",
-    filter: FilenameFilter? = null,
+    fileExtension: String? = null,
     onFileSelected: (file: File) -> Unit,
 ) {
     var showingPicker by remember { mutableStateOf(false) }
+    com.darkrockstudios.libraries.mpfilepicker.FilePicker(
+        show = showingPicker,
+        fileExtension = fileExtension,
+        initialDirectory = System.getProperty("user.home")
+    ) { path ->
+        path?.let { File(it) }?.let(onFileSelected)
+        showingPicker = false
+    }
 
-    if (showingPicker)
-        FileDialog(filter = filter) {
-            it?.let(onFileSelected)
-            showingPicker = false
-        }
-
+    // TODO: Move to FormInput
     OutlinedTextField(
         file?.path ?: "",
         {},
