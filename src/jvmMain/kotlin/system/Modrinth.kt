@@ -1,21 +1,32 @@
-package data.modrinth
+package system
 
-import java.io.InputStream
-import java.net.URI
+import data.modrinth.Category
+import data.modrinth.ProjectType
+import data.modrinth.SearchIndex
+import data.modrinth.SearchResult
 import java.net.URLEncoder
-import java.nio.charset.Charset
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
-import system.Remote
-import system.json
 
+/**
+ * Provides an interface for making requests to Modrinth.
+ */
 @ExperimentalSerializationApi
 object Modrinth {
     private val lock = ReentrantLock()
 
+    /**
+     * Performs a search in Modrinth with the given criteria.
+     * @param query The search query to perform.
+     * @param categories Some categories to search for.
+     * @param projectType The type of project to search for.
+     * @param page The page to select. Offset gets calculated with this parameter and [limit].
+     * @param limit The amount of elements to fetch for page.
+     * @param index The order of search.
+     * @return A [SearchResult] object with the results obtained from the server.
+     * @throws IllegalStateException If there's another search being performed.
+     */
     suspend fun search(
         query: String,
         categories: List<Category> = emptyList(),

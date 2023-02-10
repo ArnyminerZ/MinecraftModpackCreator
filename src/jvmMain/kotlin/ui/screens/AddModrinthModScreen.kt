@@ -51,7 +51,6 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import data.modrinth.Category
-import data.modrinth.Modrinth
 import data.modrinth.ModrinthCategoriesCache
 import data.modrinth.ProjectType
 import data.modrinth.SearchResult
@@ -59,6 +58,7 @@ import data.packwiz.Project
 import kotlin.math.ceil
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
+import system.Modrinth
 import ui.components.DropdownMenuCompat
 import ui.components.DropdownMenuItemCompat
 import ui.components.ModSearchItem
