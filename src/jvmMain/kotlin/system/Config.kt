@@ -3,7 +3,21 @@ package system
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import java.io.File
+import utils.addTo
+import utils.append
 
+/**
+ * A Singleton for managing the project's configuration. Stores all the configuration in the user's data dir
+ * ([FileSystem.dataDir]).
+ *
+ * The configuration is stored in a file called `config.properties` with a key-value pairs format separated by `=`.
+ *
+ * Example:
+ * ```properties
+ * key1=example
+ * key2=new example
+ * ```
+ */
 class Config private constructor(dataDir: File) {
     companion object {
         @Volatile
@@ -16,9 +30,12 @@ class Config private constructor(dataDir: File) {
         }
     }
 
-    private val configFile = File(dataDir, "config.properties")
+    /** Stores all the observers registered */
+    @Volatile
+    private var observers = mapOf<String, List<(value: String?) -> Unit>>()
 
-    private val observers = mutableMapOf<String, List<(value: String?) -> Unit>>()
+    /** The file where all the configuration data is stored. */
+    private val configFile = File(dataDir, "config.properties")
 
     private fun write(entries: Map<String, String>) {
         if (!configFile.parentFile.exists())
@@ -60,14 +77,16 @@ class Config private constructor(dataDir: File) {
         write(all)
     }
 
-    fun delete(key: String) = set(key, null)
+    fun delete(key: String) {
+        println("CONFIG > Removing $key")
+        set(key, null)
+    }
 
+    /**
+     * Adds a new observer to the observers list.
+     */
     fun observe(key: String, observer: (value: String?) -> Unit) {
-        val list = observers[key]
-        if (list == null)
-            observers[key] = listOf(observer)
-        else
-            observers[key] = list.toMutableList().apply { add(observer) }
+        observers = observers.toMutableMap().addTo(key, observer)
     }
 
     fun state(key: String): MutableState<String?> = mutableStateOf(get(key)).apply {
