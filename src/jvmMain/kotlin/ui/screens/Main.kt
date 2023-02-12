@@ -113,16 +113,21 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
             .distinctUntilChanged()
             .map { it?.let { File(it) } }
             .collect { projectDir ->
-                if (projectDir == null) return@collect
-                loadProject(projectDir)
+                if (projectDir == null)
+                    currentProject = null
+                else
+                    loadProject(projectDir)
             }
     }
 
     LaunchedEffect(currentProject) {
         snapshotFlow { currentProject }
             .distinctUntilChanged()
-            .filterNotNull()
-            .collect { onProjectLoaded(it) }
+            .collect {
+                if (currentProjectDir != it?.baseDir?.path)
+                    config[ConfigKey.Project] = it?.packToml?.path
+                onProjectLoaded(it)
+            }
     }
 
     MaterialTheme {
