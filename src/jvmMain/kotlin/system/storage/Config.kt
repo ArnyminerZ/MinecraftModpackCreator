@@ -26,7 +26,7 @@ class Config private constructor(dataDir: File) {
         fun get(): Config = INSTANCE ?: synchronized(Config) {
             INSTANCE?.let { return@synchronized it }
 
-            Config(FileSystem.dataDir())
+            Config(FileSystem.dataDir()).also { INSTANCE = it }
         }
     }
 
