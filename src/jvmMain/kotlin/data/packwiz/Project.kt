@@ -14,7 +14,7 @@ import system.Packwiz
 import system.storage.Config
 import system.storage.ConfigKey
 
-data class Project(private val packToml: File, val baseDir: File, val pack: Pack, val modsList: List<ModModel>) {
+data class Project(val packToml: File, val baseDir: File, val pack: Pack, val modsList: List<ModModel>) {
     class Builder(packToml: File) {
         constructor(packTomlPath: String): this(File(packTomlPath))
 
@@ -62,6 +62,9 @@ data class Project(private val packToml: File, val baseDir: File, val pack: Pack
     }
 
     private val modsDir = File(baseDir, "mods")
+
+    val exists: Boolean
+        get() = baseDir.exists()
 
     /**
      * Writes the contents of the current [pack] into the pack.toml file.

@@ -12,14 +12,14 @@ import system.storage.Cache
 import system.storage.json
 
 @ExperimentalSerializationApi
-class ModrinthModCache(private val modId: String) : Cache<Project>("modrinth", modId) {
+class ModrinthModCache(private val modId: String) : Cache<ModrinthProject>("modrinth", modId) {
     private val projectLock = ReentrantLock()
 
-    private var project: Project? = null
+    private var project: ModrinthProject? = null
 
     override suspend fun fetch() {
         Remote.inputStream("https://api.modrinth.com/v2/project/$modId", mapOf("Accept" to "application/json"))
-            .use { input -> json.decodeFromStream<Project>(input) }
+            .use { input -> json.decodeFromStream<ModrinthProject>(input) }
             .also { project = it }
             .let {
                 // Write the cache
@@ -27,16 +27,16 @@ class ModrinthModCache(private val modId: String) : Cache<Project>("modrinth", m
             }
     }
 
-    override suspend fun read(): Project = mainCacheFile.inputStream().use { json.decodeFromStream(it) }
+    override suspend fun read(): ModrinthProject = mainCacheFile.inputStream().use { json.decodeFromStream(it) }
 
-    override suspend fun getOrFetch(): Project {
+    override suspend fun getOrFetch(): ModrinthProject {
         project?.let { return it }
 
         projectLock.lock()
 
         if (!mainCacheFile.exists()) fetch()
 
-        val project: Project = try {
+        val project: ModrinthProject = try {
             read()
         } catch (e: SerializationException) {
             // Drop cache

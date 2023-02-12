@@ -28,10 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import com.akuleshov7.ktoml.exceptions.TomlDecodingException
+import com.darkrockstudios.libraries.mpfilepicker.FilePicker
 import data.packwiz.Project
 import java.io.File
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.ExperimentalSerializationApi
 import system.storage.Config
@@ -46,7 +46,7 @@ import utils.with
 @Composable
 @Preview
 @ExperimentalMaterial3Api
-fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
+fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project?) -> Unit) {
     val config = remember { Config.get() }
     val snackbarHostState = SnackbarHostState()
 
@@ -78,6 +78,15 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
             title = "Error",
             text = error ?: "",
         )
+
+    var showProjectPicker by remember { mutableStateOf(false) }
+    FilePicker(
+        showProjectPicker,
+        fileExtension = "toml",
+    ) { file ->
+        config[ConfigKey.Project] = file
+        showProjectPicker = false
+    }
 
     suspend fun loadProject(path: File) {
         println("Loading project: $path")
@@ -136,7 +145,7 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
                 MainToolbar(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                     onCreateProject = { showNewProjectWindow = true },
-                    onProjectPicked = { config[ConfigKey.Project] = it.path },
+                    onLoadProject = { showProjectPicker = true },
                     isCloseProjectAvailable = currentProject != null,
                     onCloseProjectRequested = { config.delete(ConfigKey.Project) },
                 )
@@ -156,7 +165,11 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
                 }
             }
             AnimatedVisibility(currentProject == null) {
-                NoProjectLoadedScreen()
+                NoProjectLoadedScreen(
+                    onCreateProject = { showNewProjectWindow = true },
+                    onLoadProject = { showProjectPicker = true },
+                    onSelectProject = { currentProject = it },
+                )
             }
         }
     }

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
-data class Project(
+data class ModrinthProject(
     val id: String,
     val slug: String,
     val title: String,

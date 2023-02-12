@@ -52,7 +52,7 @@ fun ApplicationScope.MainWindow() {
 
     Window(onCloseRequest = ::exitApplication, title = mainWindowTitle) {
         AppTheme {
-            MainScreen { mainWindowTitle = "Modpack Creator - ${it.pack.name}" }
+            MainScreen { project -> mainWindowTitle = project?.let { "Modpack Creator - ${it.pack.name}" } ?: "Modpack Creator" }
         }
     }
 

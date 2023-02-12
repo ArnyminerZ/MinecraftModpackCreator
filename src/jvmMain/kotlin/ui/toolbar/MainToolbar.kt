@@ -19,8 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
-import com.darkrockstudios.libraries.mpfilepicker.FilePicker
-import java.io.File
 import ui.components.DropdownMenuCompat
 import ui.components.DropdownMenuItemCompat
 
@@ -29,19 +27,10 @@ import ui.components.DropdownMenuItemCompat
 fun ApplicationScope.MainToolbar(
     modifier: Modifier = Modifier,
     onCreateProject: () -> Unit,
-    onProjectPicked: (indexToml: File) -> Unit,
+    onLoadProject: () -> Unit,
     isCloseProjectAvailable: Boolean,
     onCloseProjectRequested: () -> Unit,
 ) {
-    var showProjectPicker by remember { mutableStateOf(false) }
-    FilePicker(
-        showProjectPicker,
-        fileExtension = "toml",
-    ) { file ->
-        file?.let { File(it) }?.let(onProjectPicked)
-        showProjectPicker = false
-    }
-
     Card(
         modifier = modifier,
     ) {
@@ -65,7 +54,7 @@ fun ApplicationScope.MainToolbar(
                     )
                     DropdownMenuItemCompat(
                         "Open Project",
-                        onClick = { showProjectPicker = true; expanded = false },
+                        onClick = { onLoadProject(); expanded = false },
                     )
                     if (isCloseProjectAvailable)
                         DropdownMenuItemCompat(
