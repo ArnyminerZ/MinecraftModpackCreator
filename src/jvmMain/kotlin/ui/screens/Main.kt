@@ -50,7 +50,7 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
     val config = remember { Config.get() }
     val snackbarHostState = SnackbarHostState()
 
-    val currentProjectDir: String? by remember { config.state(ConfigKey.Project) }
+    val currentProjectDir by config.state(ConfigKey.Project)
     var currentProject: Project? by remember { mutableStateOf(null) }
     var loadingProject by remember { mutableStateOf(false) }
 
@@ -149,6 +149,9 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project) -> Unit) {
                         ProjectScreen(Modifier.padding(paddingValues)) { currentProject = it }
                     }
                 }
+            }
+            AnimatedVisibility(currentProject == null) {
+                NoProjectLoadedScreen()
             }
         }
     }

@@ -1,11 +1,10 @@
 package system.storage
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import java.io.File
 import system.FileSystem
-import utils.addTo
+import utils.append
 
 /**
  * A Singleton for managing the project's configuration. Stores all the configuration in the user's data dir
@@ -33,31 +32,41 @@ class Config private constructor(dataDir: File) {
 
     /** Stores all the observers registered */
     @Volatile
-    private var observers = mapOf<ConfigKey<*>, List<(value: Any?) -> Unit>>()
-
-    /** Stores all the states listening for updates */
-    @Volatile
-    private var states = mapOf<ConfigKey<*>, List<MutableState<Any?>>>()
+    private var observers = emptyList<ConfigObserver<Any>>()
 
     /** The file where all the configuration data is stored. */
     private val configFile = File(dataDir, "config.properties")
 
-    private fun write(entries: Map<ConfigKey<Any>, Any?>) {
-        if (!configFile.parentFile.exists())
-            configFile.parentFile.mkdirs()
-        configFile
-            .writer()
-            .buffered()
-            .use { writer ->
-                for ((key, value) in entries)
-                    writer.write("${key.key}=$value\n")
-            }
-        observers.forEach { (k, l) -> l.forEach { it(entries[k]) } }
-        states.forEach { (k, ls) -> ls.forEach { it.value = entries[k] } }
+    private fun write(list: List<Pair<String, String>>) {
+        // Convert the list of pairs into their corresponding ConfigKeyValues
+        val entries = list.map { (key, value) ->
+            val configKey = ConfigKey.valueOf(key)
+            configKey.convertToPair(value)
+        }
+        // If the config file parent directory doesn't exist, create it
+        if (!configFile.parentFile.exists()) configFile.parentFile.mkdirs()
+
+        // Encode all the lines into a StringBuilder
+        configFile.printWriter().use {  writer ->
+            for ((key, value) in entries)
+                writer.appendLine("$key=${key.serialize(value)}")
+        }
+
+        // For each observer
+        for (observer in observers) {
+            // Get its key and callbacks
+            val (key, callback) = observer
+            // Get the current value for the given entry
+            val value = entries[key]?.value
+            // Invoke the callback with the given value
+            callback(value)
+        }
     }
 
-    /** Reads all the data from the config file, and returns a map of key-value entries. */
-    private fun getAll(): Map<ConfigKey<*>, Any?> = configFile
+    /**
+     * Returns a list of all the parameters stored as raw String pairs.
+     */
+    private fun getRaw(): List<Pair<String, String>> = configFile
         // Check if the file exists
         .takeIf { it.exists() }
         // Read the file line by line
@@ -66,28 +75,52 @@ class Config private constructor(dataDir: File) {
         ?.filter { it.isNotBlank() || !it.startsWith("#") }
         // Map all lines to a pair of key-value
         ?.associate { it.indexOf('=').let { pos -> it.substring(0, pos) to it.substring(pos + 1) } }
-        ?.mapKeys { (key, _) -> ConfigKey.valueOf(key) }
-        ?.mapValues { (key, value) -> key.type.convert(value) }
-        ?:
-        // If the file doesn't exist, return empty list
-        emptyMap()
+        ?.toList()
+        ?: emptyList()
 
-    @Suppress("UNCHECKED_CAST")
-    operator fun <T: Any> get(key: ConfigKey<T>): T? = getAll()[key] as? T
+    /**
+     * Gets the value stored at the given key.
+     */
+    operator fun <T : Any> get(key: ConfigKey<T>): T? = getRaw()
+        .find { it.first == key.key }
+        ?.let { (_, value) -> key.convert(value) }
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T: Any> getValue(key: ConfigKey<T>): T = getAll().getValue(key) as T
+    fun <T : Any> getValue(key: ConfigKey<T>): T = get(key)!!
 
-    operator fun <T: Any> set(key: ConfigKey<T>, value: T?) {
-        val all = getAll().toMutableMap()
-        if (value == null)
-            all.remove(key)
-        else
-            all[key] = value
-        write(all)
+    /**
+     * Updates the value at the given [key] with the provided one.
+     * @param key The key to store the value at.
+     * @param value The value to store at [key], if null, the stored one gets removed.
+     */
+    operator fun <T : Any> set(key: ConfigKey<T>, value: T?) {
+        val raw = getRaw().toMutableList()
+        val index = raw.indexOfFirst { it.first == key.key }
+        if (value == null) {
+            if (index >= 0) raw.removeAt(index)
+        } else {
+            if (index >= 0) {
+                // The item exists
+                raw[index] = key.key to key.serialize(value)
+            } else
+                raw.add(key.key to key.serialize(value))
+        }
+
+        write(raw)
     }
 
-    fun <T: Any> delete(key: ConfigKey<T>) {
+    /**
+     * Adds a value to a configuration key that contains a String Set.
+     * @param key The key where the Set is stored at.
+     * @param value The value to add.
+     */
+    fun add(key: ConfigKey<Set<String>>, value: String) {
+        val list = get(key)?.toMutableSet() ?: mutableSetOf()
+        list.add(value)
+
+        set(key, list)
+    }
+
+    fun <T : Any> delete(key: ConfigKey<T>) {
         println("CONFIG > Removing $key")
         set(key, null)
     }
@@ -95,10 +128,11 @@ class Config private constructor(dataDir: File) {
     /**
      * Adds a new observer to the observers list.
      */
-    fun <T: Any> observe(key: ConfigKey<T>, observer: (value: T?) -> Unit) {
-        observers = observers.toMutableMap().addTo(key, observer)
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Any> observe(key: ConfigKey<T>, observer: (value: T?) -> Unit) {
+        observers = observers.toMutableList().append(ConfigObserver(key as ConfigKey<Any>) { observer(it as T?) })
     }
 
-    fun <T: Any> state(key: ConfigKey<T>): State<T?> = mutableStateOf(get<T>(key))
-        .also { states = states.toMutableMap().addTo(key, it) }
+    fun <T : Any> state(key: ConfigKey<T>): State<T?> = mutableStateOf(get(key))
+        .also { state -> observe(key) { state.value = it } }
 }

@@ -28,7 +28,7 @@ import system.storage.ConfigKey
 @Composable
 @ExperimentalMaterial3Api
 fun NoProjectLoadedScreen() {
-    val recentProjects by Config.get().state<List<String>>(ConfigKey.RecentProjects)
+    val recentProjects by Config.get().state(ConfigKey.RecentProjects)
 
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Card {
