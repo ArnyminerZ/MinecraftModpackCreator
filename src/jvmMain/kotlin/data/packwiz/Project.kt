@@ -11,9 +11,25 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import kotlinx.serialization.serializer
 import system.Packwiz
+import system.storage.Config
+import system.storage.ConfigKey
 
 data class Project(private val packToml: File, val baseDir: File, val pack: Pack, val modsList: List<ModModel>) {
-    class Builder(private val packToml: File) {
+    class Builder(packToml: File) {
+        constructor(packTomlPath: String): this(File(packTomlPath))
+
+        private val packToml: File
+
+        init {
+            if (packToml.name != "pack.toml")
+                File(packToml.parentFile, "pack.toml").let {
+                    if (!it.exists()) throw IllegalArgumentException("There's no pack.toml file available on the target directory ($it).")
+                    this.packToml = packToml
+                }
+            else
+                this.packToml = packToml
+        }
+
         /**
          * Initializes a new project.
          * @throws FileNotFoundException If the given index file doesn't exist.
@@ -41,6 +57,7 @@ data class Project(private val packToml: File, val baseDir: File, val pack: Pack
             }
 
             return Project(packToml, baseDir, pack, modsList)
+                .also { Config.get().add(ConfigKey.RecentProjects, packToml.path) }
         }
     }
 
