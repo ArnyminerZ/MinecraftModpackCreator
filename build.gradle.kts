@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.arnyminerz"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 allprojects {
     tasks.withType(KotlinCompile::class).all {
