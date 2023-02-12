@@ -77,6 +77,11 @@ data class Project(val packToml: File, val baseDir: File, val pack: Pack, val mo
     }
 
     /**
+     * Removes the project from the filesystem.
+     */
+    fun delete() = baseDir.deleteRecursively()
+
+    /**
      * Adds the given .jar [file] to the mods list, generating a `.pw.toml` file automatically.
      * @param file The `.jar` file to be added.
      * @throws NoSuchFileException If the source file doesn't exist.

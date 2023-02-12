@@ -25,9 +25,12 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import data.packwiz.Project
 import system.storage.Config
 import system.storage.ConfigKey
+import ui.dialog.AlertDialogCompat
 
 /**
  * Shown when no project has been loaded, and shows some default actions as quick accesses.
@@ -44,10 +48,28 @@ import system.storage.ConfigKey
 fun NoProjectLoadedScreen(
     onCreateProject: () -> Unit,
     onLoadProject: () -> Unit,
-    onSelectProject: (project: Project) -> Unit,
 ) {
     val config = remember { Config.get() }
     val recentProjects by config.state(ConfigKey.RecentProjects)
+
+    var deletingProject: Project? by remember { mutableStateOf(null) }
+    if (deletingProject != null)
+        AlertDialogCompat(
+            onDismissRequest = { deletingProject = null },
+            title = "Deletion",
+            text = "Are you sure that you want to delete the project \"${deletingProject?.pack?.name}\"? This will remove its directory from the file system and it will not be recoverable.",
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        deletingProject?.let { project ->
+                            project.delete()
+                            config.remove(ConfigKey.RecentProjects, project.packToml.path)
+                        }
+                    },
+                ) { Text("Delete") }
+            },
+            dismissButton = { TextButton({ deletingProject = null }) { Text("Cancel") } }
+        )
 
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Card(
@@ -107,7 +129,7 @@ fun NoProjectLoadedScreen(
                                         onClick = { config.remove(ConfigKey.RecentProjects, project.packToml.path) },
                                     ){ Icon(Icons.Rounded.Close, "Remove from recent projects") }
                                     IconButton(
-                                        onClick = { config.delete(ConfigKey.Project) },
+                                        onClick = { deletingProject = project },
                                     ){ Icon(Icons.Rounded.DeleteForever, "Delete") }
                                     IconButton(
                                         onClick = { config[ConfigKey.Project] = project.packToml.path },

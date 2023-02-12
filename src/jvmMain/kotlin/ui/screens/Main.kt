@@ -168,7 +168,6 @@ fun ApplicationScope.MainScreen(onProjectLoaded: (project: Project?) -> Unit) {
                 NoProjectLoadedScreen(
                     onCreateProject = { showNewProjectWindow = true },
                     onLoadProject = { showProjectPicker = true },
-                    onSelectProject = { currentProject = it },
                 )
             }
         }
