@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +46,8 @@ fun NoProjectLoadedScreen(
     onLoadProject: () -> Unit,
     onSelectProject: (project: Project) -> Unit,
 ) {
-    val recentProjects by Config.get().state(ConfigKey.RecentProjects)
+    val config = remember { Config.get() }
+    val recentProjects by config.state(ConfigKey.RecentProjects)
 
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Card(
@@ -102,13 +104,13 @@ fun NoProjectLoadedScreen(
                             trailingContent = {
                                 Row {
                                     IconButton(
-                                        onClick = { /* TODO: Remove from recent projects */ },
+                                        onClick = { config.remove(ConfigKey.RecentProjects, project.packToml.path) },
                                     ){ Icon(Icons.Rounded.Close, "Remove from recent projects") }
                                     IconButton(
-                                        onClick = { /* TODO: Delete */ },
+                                        onClick = { config.delete(ConfigKey.Project) },
                                     ){ Icon(Icons.Rounded.DeleteForever, "Delete") }
                                     IconButton(
-                                        onClick = { onSelectProject(project) },
+                                        onClick = { config[ConfigKey.Project] = project.packToml.path },
                                     ){ Icon(Icons.Rounded.ChevronRight, "Load") }
                                 }
                             }

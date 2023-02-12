@@ -120,6 +120,18 @@ class Config private constructor(dataDir: File) {
         set(key, list)
     }
 
+    /**
+     * Removes a value to a configuration key that contains a String Set.
+     * @param key The key where the Set is stored at.
+     * @param value The value to remove.
+     */
+    fun remove(key: ConfigKey<Set<String>>, value: String) {
+        val list = get(key)?.toMutableSet() ?: mutableSetOf()
+        list.remove(value)
+
+        set(key, list.takeIf { it.isNotEmpty() })
+    }
+
     fun <T : Any> delete(key: ConfigKey<T>) {
         println("CONFIG > Removing $key")
         set(key, null)
