@@ -38,7 +38,7 @@ kotlin {
                 implementation(compose.materialIconsExtended)
                 implementation("org.apache.maven:maven-artifact:3.9.1")
                 implementation("com.akuleshov7:ktoml-core:0.4.1")
-                implementation("com.akuleshov7:ktoml-file:0.4.1")
+                implementation("com.akuleshov7:ktoml-file:0.5.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.0")
                 implementation("com.darkrockstudios:mpfilepicker:1.2.0")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
